@@ -1,17 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
 
 export function errorHandler(
-  err: Error,
+  err: unknown,
   _req: Request,
   res: Response,
   _next: NextFunction
 ): void {
-  console.error('[Global Error Handler]:', err);
+  console.error('====================================');
+  console.error('[Global Error Handler]');
+  console.error(err);
+  console.error('====================================');
 
-  const statusCode = (err as any).statusCode || 500;
-  res.status(statusCode).json({
+  const error = err instanceof Error ? err : new Error(String(err));
+
+  res.status(500).json({
     success: false,
-    error: err.name || 'InternalServerError',
-    message: err.message || 'An unexpected error occurred on the server.'
+    error: error.name,
+    message: error.message,
+    stack: error.stack
   });
 }
