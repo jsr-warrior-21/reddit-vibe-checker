@@ -264,7 +264,7 @@ export class RedditService {
         score: Math.floor(Math.random() * 1500) + 20,
         num_comments: Math.floor(Math.random() * 300) + 5,
         upvote_ratio: parseFloat((0.7 + Math.random() * 0.28).toFixed(2)),
-        permalink: `https://www.reddit.com/r/${subreddit}/comments/sample_${i}`,
+        permalink: `https://www.reddit.com/r/${subreddit}/`,
         created_utc: Math.floor(Date.now() / 1000) - (i * 3600)
       });
     }
