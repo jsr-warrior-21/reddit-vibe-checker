@@ -124,13 +124,14 @@ export class RedditService {
   }
 
   /**
-   * Primary fetcher targeting /r/{subreddit}/hot.json endpoint
+   * Primary fetcher targeting /r/{subreddit}/hot.json endpoint with 3.5s timeout
    */
   private static async fetchFromRedditJson(subreddit: string): Promise<IRawRedditPost[]> {
     const randomUserAgent = this.USER_AGENTS[Math.floor(Math.random() * this.USER_AGENTS.length)];
     const url = `https://www.reddit.com/r/${subreddit}/hot.json?limit=50&raw_json=1`;
 
     const response = await fetch(url, {
+      signal: AbortSignal.timeout(3500),
       headers: {
         'User-Agent': randomUserAgent,
         'Accept': 'application/json, text/plain, */*',
@@ -169,13 +170,14 @@ export class RedditService {
   }
 
   /**
-   * Secondary RSS parser fallback if Reddit JSON endpoint blocks raw requests
+   * Secondary RSS parser fallback with 3.5s timeout
    */
   private static async fetchFromRedditRssFallback(subreddit: string): Promise<IRawRedditPost[]> {
     const randomUserAgent = this.USER_AGENTS[Math.floor(Math.random() * this.USER_AGENTS.length)];
     const url = `https://www.reddit.com/r/${subreddit}/hot.rss?limit=50`;
 
     const response = await fetch(url, {
+      signal: AbortSignal.timeout(3500),
       headers: {
         'User-Agent': randomUserAgent,
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
