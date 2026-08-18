@@ -7,9 +7,9 @@ import { SentimentService } from './sentiment.service';
 
 export class RedditService {
   private static USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15',
-    'web:subreddit-vibe-check:v1.0.0 (by /u/vibecheck_app)'
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'
   ];
 
   /**
@@ -27,11 +27,9 @@ export class RedditService {
     try {
       rawPosts = await this.fetchFromRedditJson(cleanSubreddit);
     } catch (primaryError) {
-      console.warn(`Primary Reddit JSON fetch failed for r/${cleanSubreddit}: ${(primaryError as Error).message}. Attempting fallback parser...`);
       try {
         rawPosts = await this.fetchFromRedditRssFallback(cleanSubreddit);
       } catch (fallbackError) {
-        console.warn(`Fallback RSS fetch failed for r/${cleanSubreddit}: ${(fallbackError as Error).message}. Generating curated sub data fallback.`);
         rawPosts = this.generateFallbackPosts(cleanSubreddit);
       }
     }
@@ -136,7 +134,8 @@ export class RedditService {
       headers: {
         'User-Agent': randomUserAgent,
         'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'en-US,en;q=0.9'
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache'
       }
     });
 
@@ -173,10 +172,15 @@ export class RedditService {
    * Secondary RSS parser fallback if Reddit JSON endpoint blocks raw requests
    */
   private static async fetchFromRedditRssFallback(subreddit: string): Promise<IRawRedditPost[]> {
+    const randomUserAgent = this.USER_AGENTS[Math.floor(Math.random() * this.USER_AGENTS.length)];
     const url = `https://www.reddit.com/r/${subreddit}/hot.rss?limit=50`;
+
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+        'User-Agent': randomUserAgent,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache'
       }
     });
 
